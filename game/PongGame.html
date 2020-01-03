@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>PongGame</title>
+  </head>
+  <body>
+    <div id="players">
+      <button type="button" id="one">One Player</button>
+      <button type="button" id="two">Two Player</button>
+    </div>
+    <div id="game"><canvas width="800" , height="600"></canvas></div>
+    <script>
+      let button1 = document.querySelector('#one')
+      let button2 = document.querySelector('#two')
+      let button = document.querySelector('#players')
+      let singlePlay = true
+      button1.addEventListener('click', () => {
+        button.style.display = 'none'
+        startGame()
+      })
+      button2.addEventListener('click', () => {
+        button.style.display = 'none'
+        singlePlay = false
+        startGame()
+      })
+      function startGame () {
+        let p1y = (p2y = 190),
+          paddleThick = 10,
+          paddleHeight = 100,
+          ballX = (ballY = 50),
+          ballDimention = 10,
+          xVelocity = 10,
+          yVelocity = 3
+        let score1 = (score2 = 0)
+        let levelChecker = 5
+        let aiSpeed = 5
+        let deltaY
+        let c = document.querySelector('canvas')
+        let cc = c.getContext('2d')
+        setInterval(update, 30)
+        window.addEventListener('mousemove', event => {
+          p1y = event.clientY - paddleHeight / 2
+        })
+
+        //Two player
+        if (!singlePlay) {
+          window.addEventListener('keydown', event => {
+            if (event.key == 'ArrowUp') {
+              if (p2y >= 0 - paddleHeight / 2) p2y -= 20
+            } else if (event.key == 'ArrowDown') {
+              if (p2y <= c.height - paddleHeight / 2) p2y += 20
+            }
+          })
+        }
+
+        function reset () {
+          ballX = c.width / 2
+          ballY = c.height / 2
+          xVelocity = -xVelocity
+          yVelocity = 3
+        }
+
+        function update () {
+          ballX += xVelocity
+          ballY += yVelocity
+          if (yVelocity < 0 && ballY < ballDimention) {
+            yVelocity = -yVelocity
+          }
+          if (yVelocity > 0 && ballY > c.height - ballDimention) {
+            yVelocity = -yVelocity
+          }
+          if (ballX < 0 + paddleThick) {
+            if (ballY > p1y && ballY < p1y + paddleHeight) {
+              xVelocity = -xVelocity
+              deltaY = ballY - (p1y + paddleHeight / 2)
+              yVelocity = deltaY * 0.3
+            } else {
+              score2++
+              reset()
+            }
+          }
+          if (ballX > c.width - paddleThick) {
+            if (ballY > p2y && ballY < p2y + paddleHeight) {
+              xVelocity = -xVelocity
+              deltaY = ballY - (p2y + paddleHeight / 2)
+              yVelocity = deltaY * 0.3
+            } else {
+              score1++
+              if (score1 == levelChecker) {
+                xVelocity += 2
+                levelChecker += 5
+                aiSpeed += 2
+                console.log(xVelocity, levelChecker, aiSpeed)
+              }
+              reset()
+            }
+          }
+
+          //singlePlay
+          if (singlePlay) {
+            if (p2y + paddleHeight / 2 < ballY) {
+              p2y += aiSpeed
+            } else {
+              p2y -= aiSpeed
+            }
+          }
+          cc.fillStyle = 'black'
+          cc.fillRect(0, 0, c.width, c.height)
+          cc.fillStyle = 'orange'
+          cc.fillRect(0, p1y, paddleThick, paddleHeight) //p1y
+          cc.fillRect(c.width - paddleThick, p2y, paddleThick, paddleHeight) //p2y
+          cc.fillRect(
+            ballX - ballDimention / 2,
+            ballY - ballDimention / 2,
+            ballDimention,
+            ballDimention
+          ) //ball
+          cc.fillText(score1, 100, 100) //
+          cc.fillText(score2, c.width - 100, 100)
+        }
+      }
+    </script>
+  </body>
+</html>
